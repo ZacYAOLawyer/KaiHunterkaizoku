@@ -1,0 +1,37 @@
+.App {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 2rem;
+  text-align: center;
+}
+
+.container {
+  margin: 1rem auto;
+}
+
+input {
+  padding: 0.5rem;
+  width: 300px;
+  margin-right: 1rem;
+}
+
+button {
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  background-color: #3477eb;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+}
+
+button:hover {
+  background-color: #1c56c7;
+}
+
+.analysis-result {
+  margin-top: 2rem;
+  text-align: left;
+  display: inline-block;
+  background-color: #f6f6f6;
+  padding: 1rem;
+  border-radius: 8px;
+}
