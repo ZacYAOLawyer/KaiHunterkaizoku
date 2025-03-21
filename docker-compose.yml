@@ -28,6 +28,11 @@ services:
       - "8545:8545"
       - "30303:30303"
       - "30303:30303/udp"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 1536M
 
   ipfs:
     build: ./ipfs
@@ -68,6 +73,11 @@ services:
       - kainet
     env_file:
       - .env
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
 
   crawler:
     build: ./crawler
