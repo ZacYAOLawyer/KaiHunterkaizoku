@@ -9,7 +9,7 @@
     "ms-azuretools.vscode-docker",
     "esbenp.prettier-vscode"
   ],
-  "forwardPorts": [3000, 8000, 5432],
+  "forwardPorts": [3000, 8000, 5432]
   "remoteUser": "root",
   "features": {
     "docker-in-docker": {
