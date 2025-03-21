@@ -1,6 +1,13 @@
 {
-  "name": "KaiKaiShield DevContainer",
-  "features": {
-    "docker-in-docker": {
-      "version": "latest",
-
+  "name": "KaiHunterkaizoku Dev Container",
+  "dockerComposeFile": ["docker-compose.yml", "docker-compose.override.yml"],
+  "service": "dind",
+  "workspaceFolder": "/workspaces/KaiHunterkaizoku",
+  "privileged": true,
+  "runArgs": ["--privileged"],
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-azuretools.vscode-docker"]
+    }
+  }
+}
