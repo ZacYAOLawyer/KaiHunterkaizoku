@@ -1,0 +1,12 @@
+{
+  "name": "kai-crawler",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "puppeteer": "^19.7.5",
+    "express": "^4.18.2",
+    "body-parser": "^1.20.1"
+  }
+}
