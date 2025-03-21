@@ -1,3 +1,5 @@
+// crawler/index.js (完整修正版)
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const puppeteer = require('puppeteer');
@@ -19,21 +21,22 @@ app.post('/detect', async (req, res) => {
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-blink-features=AutomationControlled',
+        '--disable-gpu',
+        '--disable-dev-shm-usage',
+        '--single-process',
+        '--no-zygote'
       ],
     });
     const page = await browser.newPage();
     await page.goto(url, { waitUntil: 'networkidle2' });
     const content = await page.content();
-    await browser.close();
 
+    // 假比對
     const randomSimilarity = Math.random();
     const isInfringing = (randomSimilarity > 0.95);
 
-    res.json({
-      url,
-      similarity: randomSimilarity.toFixed(2),
-      isInfringing
-    });
+    await browser.close();
+    res.json({ url, similarity: randomSimilarity.toFixed(2), isInfringing });
   } catch (error) {
     console.error('Crawler detect error:', error);
     res.status(500).json({ error: 'Crawler error' });
