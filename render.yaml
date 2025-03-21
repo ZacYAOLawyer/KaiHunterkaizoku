@@ -1,18 +1,18 @@
-# render.yaml
 services:
   - type: web
     name: kaikai-main
     env: docker
-    dockerfilePath: ./Dockerfile.render
     plan: free
+    dockerCommand: docker-compose up --build
     containerPort: 80
     envVars:
       - key: POSTGRES_URL
         fromDatabase:
           name: kaikaidb
           property: connectionString
-    databases:
-      - name: kaikaidb
-        plan: free
-        databaseName: kaishield_db
-        user: kaishield_user
+
+databases:
+  - name: kaikaidb
+    plan: free
+    databaseName: kaishield_db
+    user: kaishield_user
