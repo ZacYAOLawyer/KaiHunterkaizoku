@@ -1,0 +1,19 @@
+# Logs
+*.log
+npm-debug.log*
+yarn-error.log
+
+# Node Modules
+node_modules
+
+# Python
+__pycache__/
+
+# Env
+.env
+
+# Build
+frontend/build
+
+# DS_Store
+.DS_Store
