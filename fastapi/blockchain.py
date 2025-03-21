@@ -1,3 +1,5 @@
+# fastapi/blockchain.py (完整修正版)
+
 import os
 from web3 import Web3
 from solcx import compile_standard
@@ -6,7 +8,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 RPC_URL = os.getenv("BLOCKCHAIN_RPC_URL", "http://geth:8545")
-PRIVATE_KEY = os.getenv("BLOCKCHAIN_PRIVATE_KEY", "0xABC123")
+PRIVATE_KEY = os.getenv("BLOCKCHAIN_PRIVATE_KEY")
+
+if not PRIVATE_KEY:
+    raise ValueError("Missing BLOCKCHAIN_PRIVATE_KEY in environment")
 
 w3 = Web3(Web3.HTTPProvider(RPC_URL))
 account = w3.eth.account.from_key(PRIVATE_KEY)
@@ -54,7 +59,7 @@ def deploy_contract():
     return address
 
 def store_record(fingerprint: str, ipfs_hash: str):
-    contract_address = os.getenv("CONTRACT_ADDRESS", "0x...")  
+    contract_address = os.getenv("CONTRACT_ADDRESS", "0x...")
     compiled = compile_contract()
     abi = compiled["contracts"]["KaiKaiShieldStorage.sol"]["KaiKaiShieldStorage"]["abi"]
     contract = w3.eth.contract(address=contract_address, abi=abi)
