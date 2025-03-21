@@ -1,4 +1,3 @@
-// index.js - AI 侵權偵測爬蟲 (假示範)
 const express = require('express');
 const bodyParser = require('body-parser');
 const puppeteer = require('puppeteer');
@@ -13,7 +12,6 @@ app.get('/health', (req, res) => {
 app.post('/detect', async (req, res) => {
   const { url } = req.body;
   if (!url) return res.status(400).json({ error: 'Missing url' });
-
   try {
     const browser = await puppeteer.launch({
       headless: true,
@@ -28,7 +26,6 @@ app.post('/detect', async (req, res) => {
     const content = await page.content();
     await browser.close();
 
-    // AI 比對 (這裡用隨機數示範)
     const randomSimilarity = Math.random();
     const isInfringing = (randomSimilarity > 0.95);
 
