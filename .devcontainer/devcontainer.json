@@ -1,13 +1,18 @@
 {
-  "name": "KaiHunterkaizoku Dev Container",
-  "dockerComposeFile": ["docker-compose.yml", "docker-compose.override.yml"],
-  "service": "dind",
-  "workspaceFolder": "/workspaces/KaiHunterkaizoku",
-  "privileged": true,
-  "runArgs": ["--privileged"],
-  "customizations": {
-    "vscode": {
-      "extensions": ["ms-azuretools.vscode-docker"]
+  "name": "KaikaiShield Dev",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "express",
+  "workspaceFolder": "/workspace",
+  "settings": {},
+  "extensions": [
+    "ms-python.python",
+    "ms-azuretools.vscode-docker",
+    "esbenp.prettier-vscode"
+  ],
+  "forwardPorts": [3000, 8000, 5432],
+  "remoteUser": "root",
+  "features": {
+    "docker-in-docker": {
+      "version": "latest"
     }
   }
-}
