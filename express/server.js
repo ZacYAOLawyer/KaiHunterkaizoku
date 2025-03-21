@@ -1,4 +1,4 @@
-// server.js - Express 主程式 (含 DMCA 路由, IPFS 上傳, User Registration)
+// express/server.js (完整修正版)
 
 require('dotenv').config();
 const express = require('express');
@@ -9,16 +9,9 @@ const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const axios = require('axios');
-
-// Cloudinary
 const cloudinary = require('cloudinary').v2;
-// IPFS HTTP Client
 const { create } = require('ipfs-http-client');
 
-const app = express();
-app.use(express.json());
-
-// ============= Environment Variables =============
 const {
   POSTGRES_USER,
   POSTGRES_PASSWORD,
@@ -38,33 +31,45 @@ const {
   IPFS_PORT
 } = process.env;
 
-// PostgreSQL 連線
-const POSTGRES_URL = `postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}`;
-const pool = new Pool({ connectionString: POSTGRES_URL });
+const app = express();
+app.use(express.json());
 
-// Cloudinary 設定
+// -------------------------
+// PostgreSQL Pool with config
+// -------------------------
+const POSTGRES_URL = `postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}`;
+const pool = new Pool({
+  connectionString: POSTGRES_URL,
+  max: 20,                // 最大連線數
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000
+});
+
+// -------------------------
+// Cloudinary + IPFS client
+// -------------------------
 cloudinary.config({
   cloud_name: CLOUDINARY_CLOUD_NAME,
   api_key: CLOUDINARY_API_KEY,
   api_secret: CLOUDINARY_API_SECRET
 });
-
-// 建立 IPFS 客戶端
 const ipfs = create({
   host: IPFS_HOST || 'ipfs',
   port: IPFS_PORT || 5001,
   protocol: 'http'
 });
 
-// Multer 用於上傳檔案
+// Multer
 const upload = multer({ dest: 'uploads/' });
 
-// ============= Health Check =============
+// 健康檢查
 app.get('/health', (req, res) => {
   res.json({ status: 'Express is healthy' });
 });
 
-// ============= User Registration + Login =============
+// -------------------------
+// User Registration
+// -------------------------
 app.post('/register', async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'Email/Password required' });
@@ -78,16 +83,30 @@ app.post('/register', async (req, res) => {
   }
 });
 
+// -------------------------
+// User Login + JWT 安全參數
+// -------------------------
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
   try {
     const result = await pool.query('SELECT * FROM users WHERE email=$1', [email]);
     if (result.rowCount === 0) return res.status(401).json({ error: 'User not found' });
+
     const user = result.rows[0];
     const match = await bcrypt.compare(password, user.password_hash);
     if (!match) return res.status(401).json({ error: 'Password incorrect' });
-    // 簽發 JWT
-    const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
+
+    // JWT with secure claims
+    const token = jwt.sign(
+      { userId: user.id, email: user.email },
+      JWT_SECRET,
+      {
+        expiresIn: '4h',
+        algorithm: 'HS256',
+        issuer: 'kai-shield',
+        audience: 'web-client'
+      }
+    );
     res.json({ token });
   } catch (err) {
     console.error('Login error:', err);
@@ -95,16 +114,23 @@ app.post('/login', async (req, res) => {
   }
 });
 
-// ============= File Upload & Fingerprint =============
+// -------------------------
+// File Upload + Fingerprint
+// -------------------------
 app.post('/upload', upload.single('file'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
-    const filePath = req.file.path;
-    const fileBuffer = fs.readFileSync(filePath);
+    const fileBuffer = fs.readFileSync(req.file.path);
     const fingerprint = crypto.createHash('sha256').update(fileBuffer).digest('hex');
 
-    // 存 fingerprints 表
-    await pool.query('INSERT INTO fingerprints(hash) VALUES ($1)', [fingerprint]);
+    // 新增 metadata Example (可自行擴充)
+    const metadata = { fileName: req.file.originalname };
+
+    await pool.query(
+      'INSERT INTO fingerprints(hash, metadata) VALUES ($1, $2)',
+      [fingerprint, metadata]
+    );
+
     res.json({ message: 'File uploaded successfully', fingerprint });
   } catch (error) {
     console.error(error);
@@ -112,7 +138,9 @@ app.post('/upload', upload.single('file'), async (req, res) => {
   }
 });
 
-// ============= 上傳至 Cloudinary (選用) =============
+// -------------------------
+// Cloudinary
+// -------------------------
 app.post('/cloudinary', upload.single('file'), async (req, res) => {
   try {
     const result = await cloudinary.uploader.upload(req.file.path, {
@@ -125,7 +153,9 @@ app.post('/cloudinary', upload.single('file'), async (req, res) => {
   }
 });
 
-// ============= 上傳至 IPFS =============
+// -------------------------
+// IPFS
+// -------------------------
 app.post('/upload_to_ipfs', upload.single('file'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
@@ -138,31 +168,25 @@ app.post('/upload_to_ipfs', upload.single('file'), async (req, res) => {
   }
 });
 
-// ============= DMCA Submit (簡易示範) =============
+// -------------------------
+// DMCA (示範)
+// -------------------------
 app.post('/dmca/submit', async (req, res) => {
   try {
     const { infringingUrl, originalWork } = req.body;
-    if (!infringingUrl || !originalWork) {
-      return res.status(400).json({ error: 'Missing parameters' });
-    }
-    // 這裡可以把資料打包成 PDF 或 JSON 上傳至外部 DMCA API
-    // (以下僅示範假 call)
+    if (!infringingUrl || !originalWork) return res.status(400).json({ error: 'Missing parameters' });
+
+    // 假裝呼叫外部 API
     /*
-    const response = await axios.post('https://api.legalese.com/v1/dmca', {
-      infringing_url: infringingUrl,
-      original_work: originalWork
-    }, {
-      headers: { Authorization: `Bearer your_legalese_api_key` }
-    });
+    const response = await axios.post('https://api.legalese.com/v1/dmca', {...});
     */
-    return res.json({ message: 'DMCA requested (demo)', infringingUrl, originalWork });
+    res.json({ message: 'DMCA requested (demo)', infringingUrl, originalWork });
   } catch (error) {
     console.error('DMCA error:', error);
     res.status(500).json({ error: 'DMCA submission failed' });
   }
 });
 
-// 啟動服務
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Express server running on port ${PORT}`);
