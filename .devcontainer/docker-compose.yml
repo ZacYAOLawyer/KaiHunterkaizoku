@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  dev-env:
+    image: mcr.microsoft.com/devcontainers/base:latest
+    container_name: dev_env
+    volumes:
+      - ..:/workspace:cached
+    # 可在此指定您要安裝的額外工具 (Node.js / Python / Git 等)
+    command: sleep infinity
