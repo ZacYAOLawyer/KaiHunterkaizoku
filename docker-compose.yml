@@ -1,0 +1,109 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: kai_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - kainet
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  geth:
+    build: ./geth
+    container_name: kai_geth
+    networks:
+      - kainet
+    ports:
+      - "8545:8545"
+      - "30303:30303"
+      - "30303:30303/udp"
+
+  ipfs:
+    build: ./ipfs
+    container_name: kai_ipfs
+    networks:
+      - kainet
+    ports:
+      - "4001:4001"
+      - "5001:5001"
+      - "8080:8080"
+
+  express:
+    build: ./express
+    container_name: kai_express
+    depends_on:
+      db:
+        condition: service_healthy
+      geth:
+        condition: service_started
+      ipfs:
+        condition: service_started
+    networks:
+      - kainet
+    env_file:
+      - .env
+
+  fastapi:
+    build: ./fastapi
+    container_name: kai_fastapi
+    depends_on:
+      db:
+        condition: service_healthy
+      geth:
+        condition: service_started
+      ipfs:
+        condition: service_started
+    networks:
+      - kainet
+    env_file:
+      - .env
+
+  crawler:
+    build: ./crawler
+    container_name: kai_crawler
+    networks:
+      - kainet
+    env_file:
+      - .env
+
+  frontend:
+    build: ./frontend
+    container_name: kai_frontend
+    depends_on:
+      - express
+      - fastapi
+    networks:
+      - kainet
+    env_file:
+      - .env
+
+  nginx:
+    build: ./nginx
+    container_name: kai_nginx
+    depends_on:
+      - express
+      - fastapi
+      - frontend
+      - crawler
+    ports:
+      - "80:80"
+    networks:
+      - kainet
+
+volumes:
+  db_data:
+
+networks:
+  kainet:
+    driver: bridge
