@@ -1,7 +1,6 @@
 {
   "name": "KaikaiShield Dev",
-  "dockerComposeFile": "docker-compose.yml",
-  "service": "express",
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
   "workspaceFolder": "/workspace",
   "settings": {},
   "extensions": [
@@ -9,7 +8,7 @@
     "ms-azuretools.vscode-docker",
     "esbenp.prettier-vscode"
   ],
-  "forwardPorts": [3000, 8000, 5432]
+  "forwardPorts": [3000, 8000, 5432],
   "remoteUser": "root",
   "features": {
     "docker-in-docker": {
