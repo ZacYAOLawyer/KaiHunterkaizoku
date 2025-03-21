@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  express:
+    ports:
+      - "3000:3000"
+  fastapi:
+    ports:
+      - "8000:8000"
+  crawler:
+    ports:
+      - "8081:8081"
+  frontend:
+    ports:
+      - "3001:3001"
