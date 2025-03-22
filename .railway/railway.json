@@ -1,0 +1,19 @@
+{
+  "services": [
+    {
+      "name": "express",
+      "source": ".",
+      "start": "node express/server.js",
+      "buildCommand": "npm install",
+      "envVars": {
+        "DATABASE_URL": "YOUR_POSTGRES_URL"
+      }
+    },
+    {
+      "name": "fastapi",
+      "source": ".",
+      "start": "uvicorn fastapi.main:app --host 0.0.0.0 --port 8000",
+      "buildCommand": "pip install -r fastapi/requirements.txt"
+    }
+  ]
+}
