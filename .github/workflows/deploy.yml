@@ -1,21 +1,28 @@
+# .github/workflows/deploy.yml
 name: Deploy to Railway
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout source
+      - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Install Railway CLI
-        run: npm install -g @railway/cli
+        run: |
+          # 使用官方推薦的安裝方式
+          curl -fsSL https://raw.githubusercontent.com/railwayapp/cli/master/install.sh | sh
+          echo "$HOME/.railway/bin" >> $GITHUB_PATH
 
-      - name: Deploy to Railway
-        run: railway up
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      - name: Login to Railway
+        run: railway login --token ${{ secrets.RAILWAY_TOKEN }}
+
+      - name: Link Project
+        run: railway link ${{ secrets.RAILWAY_PROJECT_ID }}
+
+      - name: Deploy
+        run: railway up --service your-service-name
