@@ -22,7 +22,7 @@ jobs:
         run: railway login --token ${{ secrets.RAILWAY_TOKEN }}
 
       - name: Link Project
-        run: railway link ${{ secrets.RAILWAY_PROJECT_ID }}
+        run: railway link 018e71ae-8cb6-4a9c-bbd1-8351b4e19de4
 
       - name: Deploy
-        run: railway up --service your-service-name
+        run: railway up --service kaikai-main
