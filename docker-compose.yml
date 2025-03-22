@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   dind:
     image: docker:dind
@@ -7,12 +9,6 @@ services:
     networks:
       - kainet
 
-  express:
-    depends_on:
-      - dind  # 增加對 dind 的依賴
-    environment:
-      DOCKER_HOST: tcp://dind:2375
-services:
   db:
     image: postgres:15
     container_name: kai_db
@@ -32,14 +28,17 @@ services:
       retries: 5
 
   geth:
-    build: ./geth
-    container_name: kai_geth
-    networks:
-      - kainet
+    build:
+      context: ./geth
+    volumes:
+      - gethdata:/root/.ethereum
+    entrypoint: ["sh", "-c", "geth init /root/genesis.json --datadir /root/.ethereum && geth --datadir /root/.ethereum --networkid 12345 --http --http.addr 0.0.0.0 --http.port 8545 --http.api personal,eth,net,web3 --allow-insecure-unlock --dev"]
     ports:
       - "8545:8545"
       - "30303:30303"
       - "30303:30303/udp"
+    networks:
+      - kainet
     deploy:
       resources:
         limits:
@@ -125,6 +124,7 @@ services:
 
 volumes:
   db_data:
+  gethdata:
 
 networks:
   kainet:
