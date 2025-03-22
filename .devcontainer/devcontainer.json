@@ -1,16 +1,10 @@
 {
-  "name": "KaikaiShield Dev (Multi-Container)",
-  // 用 dockerComposeFile 取代 image
+  "name": "KaikaiShield Dev",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
   "dockerComposeFile": "docker-compose.yml",
-  // 指定要 attach 的服務 (即 VSCode/Codespaces 的主要工作容器)
-  "service": "dev", 
-  // 這個 "dev" 要在 docker-compose.yml 中對應 e.g. "services: dev:"
-  
+  "service": "express",
   "workspaceFolder": "/workspace",
-  
-  "settings": {
-    // VSCode/Codespaces 一些設定
-  },
+  "settings": {},
   "extensions": [
     "ms-python.python",
     "ms-azuretools.vscode-docker",
@@ -18,8 +12,6 @@
   ],
   "forwardPorts": [3000, 8000, 5432],
   "remoteUser": "root",
-  
-  // 若需要在容器內動態安裝 Docker
   "features": {
     "docker-in-docker": {
       "version": "latest"
