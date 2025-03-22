@@ -3,7 +3,7 @@
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
   "dockerComposeFile": "docker-compose.yml",
   "service": "express",
-  "workspaceFolder": "/workspace",
+  "workspaceFolder": "/workspaces/KaiHunterkaizoku",
   "settings": {},
   "extensions": [
     "ms-python.python",
