@@ -12,9 +12,10 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v3
 
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
       - name: Deploy to Railway
-        uses: railwayapp/railway-action@4792c96856dc8e65e48ef14f4e3b13ae2477996a
-        with:
-          command: up
+        run: railway up --service=kaikai-main
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
